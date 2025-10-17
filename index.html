@@ -23,6 +23,12 @@
       grid-template-columns:repeat(auto-fill, minmax(200px,1fr));
       gap:18px;
     }
+    @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: repeat(2, 1fr); /* 👈 2 columnas en celulares */
+      gap: 12px;
+      }
+    }
     .card{
       background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);
       padding:12px;text-align:center;cursor:pointer;transition:transform .15s ease
@@ -186,3 +192,4 @@
   </script>
 </body>
 </html>
+
