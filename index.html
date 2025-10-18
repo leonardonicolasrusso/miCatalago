@@ -24,9 +24,9 @@
       gap:18px;
     }
     @media (max-width: 600px) {
-      .grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+    .grid {
+      grid-template-columns: repeat(2, 1fr); /* 👈 2 columnas en celulares */
+      gap: 12px;
       }
     }
     .card{
@@ -57,7 +57,6 @@
       aspect-ratio:1/1;          /* cuadrada en la ficha también */
       object-fit:contain;
       background:#f1f3f5;border-radius:16px;
-      cursor: zoom-in;           /* indica que se puede ampliar */
     }
     .detail h2{margin:0 0 6px 0;text-transform:uppercase}
     .muted{color:var(--muted)}
@@ -69,41 +68,6 @@
     @media (max-width: 860px){
       .detail-card{grid-template-columns:1fr}
     }
-
-    /* LIGHTBOX (Zoom) */
-    .lightbox{
-      position:fixed; inset:0; z-index:50;
-      display:none; align-items:center; justify-content:center;
-      background: rgba(0,0,0,.75);
-      padding:18px;
-    }
-    .lightbox.open{ display:flex; }
-    .zoom-wrap{
-      width:min(950px, 96vw); max-height:92vh;
-      background:#fff; border-radius:16px; box-shadow: var(--shadow);
-      padding:16px; display:flex; flex-direction:column; align-items:center; gap:12px;
-    }
-    .zoom-stage{
-      width:100%; height:min(72vh, 70dvh);
-      display:flex; align-items:center; justify-content:center;
-      background:#0b0b0b; border-radius:12px; overflow:hidden;
-    }
-    .zoom-img{
-      max-width:100%; max-height:100%;
-      object-fit:contain;
-      transform-origin:center center;
-      user-select:none;
-      -webkit-user-drag:none;
-    }
-    .zoom-controls{ display:flex; gap:8px; flex-wrap:wrap; justify-content:center }
-    .zoom-btn{
-      border:none; padding:9px 12px; border-radius:10px; font-weight:700; cursor:pointer;
-      background:#111; color:#fff;
-    }
-    .zoom-close{
-      border:1px solid #e5e7eb; background:#fff; color:#111;
-    }
-    .hint{ font-size:12px; color:var(--muted); text-align:center }
   </style>
 </head>
 <body>
@@ -128,27 +92,10 @@
             <button id="shareBtn" class="btn primary">Compartir</button>
             <span id="shared" class="tag">¡Listo para enviar!</span>
           </div>
-          <p class="hint">Toca la imagen para ampliarla.</p>
         </div>
       </div>
     </section>
   </main>
-
-  <!-- LIGHTBOX ZOOM -->
-  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Zoom de imagen">
-    <div class="zoom-wrap">
-      <div class="zoom-stage">
-        <img id="zoomImg" class="zoom-img" alt="Zoom control" />
-      </div>
-      <div class="zoom-controls">
-        <button id="zoomOut"  class="zoom-btn">–</button>
-        <button id="zoomReset" class="zoom-btn">100%</button>
-        <button id="zoomIn"   class="zoom-btn">+</button>
-        <button id="zoomClose" class="zoom-btn zoom-close">✕ Cerrar</button>
-      </div>
-      <div class="hint">Usa la rueda del mouse o pellizca en móvil para acercar/alejar.</div>
-    </div>
-  </div>
 
   <script>
     const gridEl   = document.getElementById('grid');
@@ -159,16 +106,6 @@
     const shareBtn = document.getElementById('shareBtn');
     const shared   = document.getElementById('shared');
     const backLink = document.getElementById('backLink');
-
-    // Lightbox refs
-    const lightbox  = document.getElementById('lightbox');
-    const zoomImg   = document.getElementById('zoomImg');
-    const zoomInBtn = document.getElementById('zoomIn');
-    const zoomOutBtn= document.getElementById('zoomOut');
-    const zoomResetBtn=document.getElementById('zoomReset');
-    const zoomCloseBtn=document.getElementById('zoomClose');
-
-    let scale = 1;
 
     // Lista (incluye variantes alfanuméricas)
     const items = [
@@ -227,9 +164,6 @@
         }
       };
 
-      // Abrir zoom al tocar la imagen
-      dImg.onclick = () => openZoom(src);
-
       gridEl.style.display = 'none';
       detailEl.classList.add('visible');
       window.scrollTo({top:0, behavior:'smooth'});
@@ -250,33 +184,6 @@
       const id = getId();
       if(id){ showDetail(id); } else { detailEl.classList.remove('visible'); gridEl.style.display='grid'; }
     });
-
-    /* ====== ZOOM / LIGHTBOX ====== */
-    function openZoom(src){
-      zoomImg.src = src;
-      scale = 1;
-      applyScale();
-      lightbox.classList.add('open');
-    }
-    function closeZoom(){ lightbox.classList.remove('open'); }
-
-    function applyScale(){ zoomImg.style.transform = `scale(${scale})`; }
-    zoomInBtn.onclick  = () => { scale = Math.min(4, +(scale+0.2).toFixed(2)); applyScale(); };
-    zoomOutBtn.onclick = () => { scale = Math.max(0.5, +(scale-0.2).toFixed(2)); applyScale(); };
-    zoomResetBtn.onclick = () => { scale = 1; applyScale(); };
-    zoomCloseBtn.onclick = closeZoom;
-
-    // Cerrar al clickear fuera
-    lightbox.addEventListener('click', (e)=>{ if(e.target === lightbox) closeZoom(); });
-    // Scroll para zoom
-    zoomImg.addEventListener('wheel', (e)=>{
-      e.preventDefault();
-      if(e.deltaY < 0) scale = Math.min(4, +(scale+0.1).toFixed(2));
-      else             scale = Math.max(0.5, +(scale-0.1).toFixed(2));
-      applyScale();
-    }, { passive:false });
-    // Esc para cerrar
-    window.addEventListener('keydown', (e)=>{ if(e.key === 'Escape') closeZoom(); });
 
     // Init
     renderGrid();
