@@ -125,6 +125,7 @@
           <h2 id="detailName">LCD 000</h2>
           <div class="row">
             <a id="openLink" style="display:none" class="btn" target="_blank" rel="noopener">Abrir este link</a>
+            <a id="waBtn"    class="btn" target="_blank" rel="noopener">WhatsApp</a>
             <button id="shareBtn" class="btn primary">Compartir</button>
             <span id="shared" class="tag">¡Listo para enviar!</span>
           </div>
@@ -156,6 +157,7 @@
     const dImg = document.getElementById('detailImg');
     const dName = document.getElementById('detailName');
     const openLink = document.getElementById('openLink');
+    const waBtn    = document.getElementById('waBtn');
     const shareBtn = document.getElementById('shareBtn');
     const shared   = document.getElementById('shared');
     const backLink = document.getElementById('backLink');
@@ -206,22 +208,31 @@
       dImg.src = src; dImg.alt = name;
       dName.textContent = name;
 
-      const link = `${location.origin}${location.pathname}?id=${encodeURIComponent(id)}`;
-      openLink.href = link;
+      // URL absoluta de la página y de la imagen (para compartir/preview)
+      const pageUrl = new URL(`${location.pathname}?id=${encodeURIComponent(id)}`, location.origin).toString();
+      const imgUrl  = new URL(src, location.href).toString();
 
-      // Compartir nativo con fallback a copiar link
+      openLink.href = pageUrl;
+
+      // Mensaje con la imagen primero (ayuda a que WhatsApp muestre preview)
+      const shareText = `Mirá este control ${name}\n${imgUrl}\n${pageUrl}`;
+
+      // Botón WhatsApp directo
+      waBtn.href = 'https://wa.me/?text=' + encodeURIComponent(shareText);
+
+      // Web Share API + fallback a copiar texto
       shareBtn.onclick = async () => {
-        const shareData = { title: 'Catálogo de Controles', text: `Mirá este control: ${name}`, url: link };
+        const shareData = { title: 'Catálogo de Controles', text: shareText, url: pageUrl };
         try {
           if (navigator.share) {
             await navigator.share(shareData);
             shared.textContent = '✅ Compartido';
           } else {
-            await navigator.clipboard.writeText(link);
-            shared.textContent = '🔗 Link copiado (compartí manualmente)';
+            await navigator.clipboard.writeText(shareText);
+            shared.textContent = '🔗 Texto copiado (pegá en WhatsApp)';
           }
           shared.style.display = 'inline';
-          setTimeout(()=> shared.style.display='none', 2000);
+          setTimeout(()=> shared.style.display='none', 2200);
         } catch (err) {
           console.log('Cancelado o error al compartir:', err);
         }
